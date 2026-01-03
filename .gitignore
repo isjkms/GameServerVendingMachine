@@ -100,3 +100,5 @@ $RECYCLE.BIN/
 *.pem
 
 # End of https://www.toptal.com/developers/gitignore/api/rust,visualstudiocode,macos,windows
+
+.env
