@@ -1,3 +1,5 @@
+use crate::utils::logger::{Logger, LogLevel};
+
 use serenity::async_trait;
 use serenity::prelude::*;
 use serenity::model::channel::Message;
@@ -27,13 +29,19 @@ impl Bot {
             | GatewayIntents::MESSAGE_CONTENT // 메시지의 내용을 읽을 수 있는 권한
             | GatewayIntents::GUILDS; // 봇이 서버에 들어가거나 나가는 것
 
-        let mut client = Client::builder(&self.token, intents)
+        let mut client = match Client::builder(&self.token, intents)
             .event_handler(self)
             .await
-            .expect("Failed to create client");
+        {
+            Ok(client) => client,
+            Err(e) => {
+                Logger::print(LogLevel::Error, "bot.rs", "start", &format!("Failed to create client: {:?}", e));
+                return;
+            }
+        };
 
         if let Err(why) = client.start().await {
-            println!("Client error: {:?}", why);
+            Logger::print(LogLevel::Error, "bot.rs", "start", &format!("Client error: {:?}", why));
         }
     }
 }
@@ -42,14 +50,14 @@ impl Bot {
 impl EventHandler for Bot {
     // 봇이 로그인됐을 때
     async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} connected successfully!", ready.user.name);
+        Logger::print(LogLevel::Info, "bot.rs", "ready", &format!("{} connected successfully!", ready.user.name));
     }
 
     async fn guild_create(&self, ctx: Context, guild: Guild, is_new: Option<bool>) {
         if is_new == Some(true) {
-            println!("Newly invited server"); // 새로 초대된 서버
+            Logger::print(LogLevel::Info, "bot.rs", "guild_create", "Newly invited server");
             if let Some(system_channel) = guild.system_channel_id {
-                println!("System channel found: {:?}", system_channel);
+                Logger::print(LogLevel::Info, "bot.rs", "guild_create", &format!("System channel found: {:?}", system_channel));
 
                 let welcome_msg = format!(
                     "안녕하세요. {}입니다.",
@@ -57,15 +65,15 @@ impl EventHandler for Bot {
                 );
 
                 if let Err(e) = system_channel.say(&ctx.http, welcome_msg).await {
-                    println!("Failed to send welcome message: {:?}", e);
+                    Logger::print(LogLevel::Error, "bot.rs", "guild_create", &format!("Failed to send welcome message: {:?}", e));
                 } else {
-                    println!("Welcome message sent successfully!");
+                    Logger::print(LogLevel::Info, "bot.rs", "guild_create", "Welcome message sent successfully!");
                 }
             } else {
-                println!("No system channel found!");
+                Logger::print(LogLevel::Warn, "bot.rs", "guild_create", "No system channel found!");
             }
         } else {
-            println!("is_new is not Some(true): {:?}", is_new);
+            Logger::print(LogLevel::Warn, "bot.rs", "guild_create", &format!("is_new is not Some(true): {:?}", is_new));
         }
     }
 
