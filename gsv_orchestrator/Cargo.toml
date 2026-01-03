@@ -1,0 +1,16 @@
+[package]
+name = "gsv_orchestrator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# K8s 제어: Pod를 감시하고 조작하는 핵심 도구
+kube = { version = "0.90", features = ["runtime", "derive"] }
+# K8s 데이터 구조: Pod, Node 등의 데이터를 Rust 객체로 다룸
+k8s-openapi = { version = "0.21", features = ["v1_28"] }
+# 비동기 실행: 실시간 감시를 위해 여러 작업을 동시에 처리
+tokio = { version = "1.36", features = ["full"] }
+# 데이터 변환: YAML이나 JSON 데이터를 Rust에서 쓰기 쉽게 변환
+serde = { version = "1.0", features = ["derive"] }
+# 에러 처리: 발생할 수 있는 다양한 오류를 깔끔하게 관리
+anyhow = "1.0"
