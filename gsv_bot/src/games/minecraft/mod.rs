@@ -10,9 +10,14 @@ impl MinecraftServer {
 }
 
 impl GameServer for MinecraftServer {
-    fn start(&self) -> Result<String, String> {
+    fn start(&self, user_name: &str) -> Result<String, String> {
         // 서버 실행 로직
-        Logger::print(LogLevel::Info, "minecraft/mod.rs", "start", "마인크래프트 프로세스 실행 시도 중...");
+        Logger::print(
+            LogLevel::Info, 
+            "minecraft/mod.rs", 
+            "start", 
+            &format!("Attempting to run Minecraft process... (Requested by: {})", user_name)
+        );
         
         let success = true;
 

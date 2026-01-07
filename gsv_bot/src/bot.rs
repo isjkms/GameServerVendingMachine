@@ -1,8 +1,13 @@
 use crate::commands;
 use crate::utils::logger::{Logger, LogLevel};
+use crate::games::ServerInfo;
+
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 use serenity::all::{
-    Command, Context, CreateInteractionResponse,
+    ChannelId, Command, Context, CreateInteractionResponse,
     CreateInteractionResponseMessage, EventHandler, GatewayIntents, Guild, Interaction, Ready,
 };
 use serenity::async_trait;
@@ -10,8 +15,9 @@ use serenity::Client;
 
 pub struct Bot {
     name: String,
-    is_active: bool,
     token: String,
+    is_active: bool,
+    game_servers: Arc<RwLock<HashMap<ChannelId, ServerInfo>>>,
 }
 
 impl Bot {
@@ -19,8 +25,9 @@ impl Bot {
     pub fn new(name: &str, token: &str) -> Self {
         Bot {
             name: name.to_string(),
-            is_active: true,
             token: token.to_string(),
+            is_active: true,
+            game_servers: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
@@ -47,9 +54,9 @@ impl Bot {
 
     pub fn get_status_message(&self) -> &'static str {
         if self.is_active {
-            "✅ 봇이 현재 실행 중입니다."
+            "봇이 현재 실행 중입니다."
         } else {
-            "💤 봇이 쉬고 있습니다."
+            "봇이 쉬고 있습니다."
         }
     }
 }
@@ -76,7 +83,7 @@ impl EventHandler for Bot {
             // 명령어 실행 및 결과 획득
             let content = match command.data.name.as_str() {
                 "status" => self.get_status_message().to_string(),
-                _ => commands::run(&ctx, &command).await,
+                _ => commands::run(&ctx, &command, self.game_servers.clone()).await,
             };
 
             // 결과 전송
@@ -113,5 +120,4 @@ impl EventHandler for Bot {
             Logger::print(LogLevel::Warn, "bot.rs", "guild_create", &format!("is_new is not Some(true): {:?}", is_new));
         }
     }
-
 }
