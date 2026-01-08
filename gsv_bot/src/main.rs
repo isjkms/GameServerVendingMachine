@@ -1,5 +1,7 @@
 mod bot;
 mod utils;
+mod commands;
+pub mod games;
 
 use std::env;
 use utils::logger::{Logger, LogLevel};
