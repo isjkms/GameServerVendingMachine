@@ -1,0 +1,7 @@
+game: minecraft
+image: itzg/minecraft-server:latest
+service_port: 25565
+pvc_size: 5Gi
+resources:
+  cpu: "500m"
+  memory: "1Gi"
